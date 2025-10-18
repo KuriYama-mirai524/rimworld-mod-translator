@@ -20,11 +20,35 @@
 - PySide6
 - OpenAI Python 客户端
 - requests 库
+- python-dotenv 库
+
+### 🔐 API密钥配置
+
+**重要安全提醒**：请勿将API密钥直接写入代码中！
+
+1. **复制环境变量模板**：
+   ```bash
+   cp .env.example .env
+   ```
+
+2. **编辑 .env 文件**，填入您的API密钥：
+   ```
+   OPENAI_API_KEY=your_openai_api_key_here
+   DEEPSEEK_API_KEY=your_deepseek_api_key_here
+   GLM_API_KEY=your_glm_api_key_here
+   QWEN_API_KEY=your_qwen_api_key_here
+   ALIYY_API_KEY=your_aliyy_api_key_here
+   ```
+
+3. **确保 .env 文件安全**：
+   - 已将 `.env` 添加到 `.gitignore`，不会提交到版本库
+   - 请勿分享或上传您的 `.env` 文件
+   - 定期更换API密钥
 
 ### 安装依赖
 
 ```bash
-pip install PySide6 openai requests
+pip install PySide6 openai requests python-dotenv
 ```
 
 ### 使用方法
@@ -84,11 +108,16 @@ f:/mod重命名/
 
 ## ⚠️ 注意事项
 
-1. **API 密钥**：需要在 `chat2gpt4o.py` 中配置有效的 AI 服务 API 密钥
-2. **网络连接**：AI 翻译功能需要稳定的网络连接
-3. **文件备份**：工具会自动创建备份文件，但建议手动备份重要数据
-4. **处理速度**：AI 调用有延迟，大量模组处理可能需要较长时间
-5. **Steam 路径**：默认路径为 `E:\steam\steamapps\workshop\content\294100`，请根据实际情况调整
+### 🔐 安全提醒
+1. **API 密钥安全**：请勿将API密钥硬编码在源代码中，使用环境变量配置
+2. **环境变量**：使用 `.env` 文件管理API密钥，确保 `.env` 文件在 `.gitignore` 中
+3. **定期更新**：建议定期更换API密钥，避免密钥泄露风险
+
+### 🚀 使用提醒
+4. **网络连接**：AI 翻译功能需要稳定的网络连接
+5. **文件备份**：工具会自动创建备份文件，但建议手动备份重要数据
+6. **处理速度**：AI 调用有延迟，大量模组处理可能需要较长时间
+7. **Steam 路径**：默认路径为 `E:\steam\steamapps\workshop\content\294100`，请根据实际情况调整
 
 ## 🛠️ 开发说明
 

@@ -19,6 +19,13 @@ from PySide6.QtWidgets import (
 from PySide6.QtCore import QThread, Signal, Slot, QObject
 from PySide6.QtGui import QFont, QTextCursor
 
+# 尝试加载环境变量
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+except ImportError:
+    print("提示：未安装 python-dotenv，请确保手动设置环境变量")
+
 import chat2gpt4o
 
 

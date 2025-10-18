@@ -1,14 +1,28 @@
 import requests
 import json
+import os
 from openai import OpenAI
 import time
+
+# 从环境变量获取API密钥
+OPENAI_API_KEY = os.getenv('OPENAI_API_KEY', '')
+DEEPSEEK_API_KEY = os.getenv('DEEPSEEK_API_KEY', '')
+GLM_API_KEY = os.getenv('GLM_API_KEY', '')
+QWEN_API_KEY = os.getenv('QWEN_API_KEY', '')
 
 def send_chat(message, pormet, use_url2=False):
     url = "https://api.aliyy.cc/v1/chat/completions"
     url2 = 'https://free.zeroai.chat/v1/chat/completions'
+    
+    # 使用环境变量中的API密钥
+    api_key = os.getenv('ALIYY_API_KEY', '')
+    if not api_key:
+        print("警告：未设置 ALIYY_API_KEY 环境变量")
+        return None
+        
     headers = {
         'Content-Type': 'application/json',
-        'Authorization': 'Bearer sk-RUqxVLekrxJlVOqIcPyapuchbWLHnmXq'
+        'Authorization': f'Bearer {api_key}'
     }
     data = {
         "model": "gpt-4o-mini",
@@ -54,9 +68,13 @@ def deepseek(message, pormet):
     max_retries = 3
     retry_delay = 1
     
+    if not DEEPSEEK_API_KEY:
+        print("警告：未设置 DEEPSEEK_API_KEY 环境变量")
+        return None
+    
     for attempt in range(max_retries):
         try:
-            client = OpenAI(api_key="sk-1eab9efcbbf74d9cbadf6bb8eaa509bd", base_url="https://api.deepseek.com", timeout=10)
+            client = OpenAI(api_key=DEEPSEEK_API_KEY, base_url="https://api.deepseek.com", timeout=10)
             response = client.chat.completions.create(
                 model="deepseek-chat",
                 messages=[
@@ -77,10 +95,14 @@ def glm(message, pormet):
     max_retries = 3
     retry_delay = 1
     
+    if not GLM_API_KEY:
+        print("警告：未设置 GLM_API_KEY 环境变量")
+        return None
+    
     for attempt in range(max_retries):
         try:
             client = OpenAI(
-                api_key="9f4a45a9957a86f5ef5267bab5d2330c.uaJ3USMTPN2Quve2",
+                api_key=GLM_API_KEY,
                 base_url="https://open.bigmodel.cn/api/paas/v4/",
                 timeout=10
             )
@@ -105,10 +127,14 @@ def qwen_flash(message, pormet):
     max_retries = 3
     retry_delay = 1
     
+    if not QWEN_API_KEY:
+        print("警告：未设置 QWEN_API_KEY 环境变量")
+        return None
+    
     for attempt in range(max_retries):
         try:
             client = OpenAI(
-                api_key="sk-ba91ac98378b41c8af7dd947ce57c811",
+                api_key=QWEN_API_KEY,
                 base_url="https://dashscope.aliyuncs.com/compatible-mode/v1",
                 timeout=10
             )
