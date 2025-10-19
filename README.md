@@ -1,6 +1,8 @@
 # RimWorld Mod 名称翻译工具 🤖
 
 一个基于 PySide6 的图形界面工具，用于批量处理 RimWorld 模组的中文名称翻译。使用 AI 技术自动生成模组的中文名称，让中文玩家更容易理解和选择模组。
+
+在[rimsort](https://github.com/RimSort/RimSort)的表现如下：
 ![alt text](https://youke1.picui.cn/s1/2025/10/19/68f47fc11b4a4.png)
 
 ## ✨ 功能特性
