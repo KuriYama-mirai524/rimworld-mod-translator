@@ -5,22 +5,15 @@ import time
 import os
 from dotenv import load_dotenv
 
-<<<<<<< HEAD
 # 加载环境变量
 load_dotenv()
 
-=======
->>>>>>> 97f60d870c19d13965b578ab55d2219e92b9cbca
 def send_chat(message, pormet, use_url2=False):
     url = "https://api.aliyy.cc/v1/chat/completions"
     url2 = 'https://free.zeroai.chat/v1/chat/completions'
     headers = {
         'Content-Type': 'application/json',
-<<<<<<< HEAD
         'Authorization': f"Bearer {os.getenv('ALIYY_API_KEY')}"
-=======
-        'Authorization': 'Bearer sk-RUqxVLekrxJlVOqIcPyapuchbWLHnmXq'
->>>>>>> 97f60d870c19d13965b578ab55d2219e92b9cbca
     }
     data = {
         "model": "gpt-4o-mini",
@@ -68,11 +61,7 @@ def deepseek(message, pormet):
     
     for attempt in range(max_retries):
         try:
-<<<<<<< HEAD
             client = OpenAI(api_key=os.getenv('DEEPSEEK_API_KEY'), base_url="https://api.deepseek.com", timeout=10)
-=======
-            client = OpenAI(api_key="sk-1eab9efcbbf74d9cbadf6bb8eaa509bd", base_url="https://api.deepseek.com", timeout=10)
->>>>>>> 97f60d870c19d13965b578ab55d2219e92b9cbca
             response = client.chat.completions.create(
                 model="deepseek-chat",
                 messages=[
@@ -96,11 +85,7 @@ def glm(message, pormet):
     for attempt in range(max_retries):
         try:
             client = OpenAI(
-<<<<<<< HEAD
                 api_key=os.getenv('GLM_API_KEY'),
-=======
-                api_key="9f4a45a9957a86f5ef5267bab5d2330c.uaJ3USMTPN2Quve2",
->>>>>>> 97f60d870c19d13965b578ab55d2219e92b9cbca
                 base_url="https://open.bigmodel.cn/api/paas/v4/",
                 timeout=10
             )
@@ -128,11 +113,7 @@ def qwen_flash(message, pormet):
     for attempt in range(max_retries):
         try:
             client = OpenAI(
-<<<<<<< HEAD
                 api_key=os.getenv('QWEN_API_KEY'),
-=======
-                api_key="sk-ba91ac98378b41c8af7dd947ce57c811",
->>>>>>> 97f60d870c19d13965b578ab55d2219e92b9cbca
                 base_url="https://dashscope.aliyuncs.com/compatible-mode/v1",
                 timeout=10
             )
