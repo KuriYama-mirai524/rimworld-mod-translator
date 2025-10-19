@@ -55,3 +55,4 @@ Thumbs.db
 # API keys and secrets
 secrets/
 config/secrets.json
+..gitignore
