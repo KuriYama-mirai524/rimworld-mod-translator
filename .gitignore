@@ -55,4 +55,8 @@ Thumbs.db
 # API keys and secrets
 secrets/
 config/secrets.json
+<<<<<<< HEAD
 ..gitignore
+=======
+.gitignore
+>>>>>>> 3f7effdb1faa7c02eec62e59677f0664659f7590
