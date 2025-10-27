@@ -7,7 +7,7 @@
 
 
 ## GUI示例：
-![alt text](image.png)
+![alt text](https://youke1.picui.cn/s1/2025/10/27/68ff500fac89d.png)
 
 ## ✨ 功能特性
 
