@@ -5,6 +5,10 @@
 在[rimsort](https://github.com/RimSort/RimSort)的表现如下：
 ![alt text](https://youke1.picui.cn/s1/2025/10/19/68f47fc11b4a4.png)
 
+
+## GUI示例：
+![alt text](image.png)
+
 ## ✨ 功能特性
 
 - **AI 智能翻译**：使用多种 AI 模型（GPT-4o、DeepSeek、GLM、通义千问）自动生成模组中文名称
