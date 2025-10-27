@@ -7,6 +7,7 @@ RimWorld Mod 名称翻译工具 - PySide6版本
 import os
 import xml.etree.ElementTree as ET
 import time
+import json
 from pathlib import Path
 from typing import Optional, List
 from concurrent.futures import ThreadPoolExecutor, as_completed
@@ -178,9 +179,12 @@ class WorkerSignals(QObject):
 class ModProcessorWorker(QThread):
     """模组处理工作线程"""
     
-    def __init__(self, directory_path: str):
+    def __init__(self, directory_path: str, model_name: str = "glm", api_key: str = "", base_url: str = ""):
         super().__init__()
         self.directory_path = directory_path
+        self.model_name = model_name
+        self.api_key = api_key
+        self.base_url = base_url
         self.signals = WorkerSignals()
         self.is_running = True
         self.prompt = (
@@ -316,10 +320,20 @@ class ModProcessorWorker(QThread):
             message = f'名称：{name}，描述：{description}'
             try:
                 import chat2gpt4o
-                summary = chat2gpt4o.qwen_flash(message=message, pormet=self.prompt)
+                # 使用自定义模型配置
+                summary = chat2gpt4o.call_model(
+                    model_name=self.model_name,
+                    message=message,
+                    pormet=self.prompt,
+                    api_key=self.api_key,
+                    base_url=self.base_url
+                )
             except ImportError:
                 # 如果chat2gpt4o不可用，使用简单的模拟
                 summary = f"中文总结: {name[:10]}模组"
+            except Exception as e:
+                self.signals.log.emit(f"❌ AI调用失败: {str(e)}")
+                return None
             
             if not summary:
                 return None
@@ -377,6 +391,72 @@ class ModProcessorGUI(QMainWindow):
         # 第一个选项卡：AI翻译功能
         ai_translation_tab = QWidget()
         ai_layout = QVBoxLayout(ai_translation_tab)
+        
+        # 模型配置区域
+        model_group = QGroupBox("🤖 AI模型配置")
+        model_group.setFont(QFont("Microsoft YaHei", 10))
+        model_layout = QVBoxLayout()
+        
+        # 模型名称输入
+        model_name_layout = QHBoxLayout()
+        model_name_label = QLabel("模型名称:")
+        model_name_label.setFont(QFont("Microsoft YaHei", 9))
+        model_name_label.setMinimumWidth(80)
+        self.model_name_input = QLineEdit()
+        self.model_name_input.setText("glm")
+        self.model_name_input.setFont(QFont("Microsoft YaHei", 9))
+        self.model_name_input.setMinimumHeight(35)
+        self.model_name_input.setPlaceholderText("例如: glm, deepseek, qwen, gpt")
+        model_name_layout.addWidget(model_name_label)
+        model_name_layout.addWidget(self.model_name_input)
+        model_layout.addLayout(model_name_layout)
+        
+        # API密钥输入
+        api_key_layout = QHBoxLayout()
+        api_key_label = QLabel("API密钥:")
+        api_key_label.setFont(QFont("Microsoft YaHei", 9))
+        api_key_label.setMinimumWidth(80)
+        self.api_key_input = QLineEdit()
+        self.api_key_input.setFont(QFont("Microsoft YaHei", 9))
+        self.api_key_input.setMinimumHeight(35)
+        self.api_key_input.setPlaceholderText("请输入API密钥")
+        self.api_key_input.setEchoMode(QLineEdit.Password)
+        api_key_layout.addWidget(api_key_label)
+        api_key_layout.addWidget(self.api_key_input)
+        model_layout.addLayout(api_key_layout)
+        
+        # API基础URL输入
+        base_url_layout = QHBoxLayout()
+        base_url_label = QLabel("API地址:")
+        base_url_label.setFont(QFont("Microsoft YaHei", 9))
+        base_url_label.setMinimumWidth(80)
+        self.base_url_input = QLineEdit()
+        self.base_url_input.setFont(QFont("Microsoft YaHei", 9))
+        self.base_url_input.setMinimumHeight(35)
+        self.base_url_input.setPlaceholderText("可选，使用默认地址可留空")
+        base_url_layout.addWidget(base_url_label)
+        base_url_layout.addWidget(self.base_url_input)
+        model_layout.addLayout(base_url_layout)
+        
+        # 配置保存/加载按钮
+        config_button_layout = QHBoxLayout()
+        self.save_config_btn = QPushButton("💾 保存配置")
+        self.save_config_btn.setFont(QFont("Microsoft YaHei", 9))
+        self.save_config_btn.setMinimumSize(100, 35)
+        self.save_config_btn.clicked.connect(self.save_model_config)
+        
+        self.load_config_btn = QPushButton("📂 加载配置")
+        self.load_config_btn.setFont(QFont("Microsoft YaHei", 9))
+        self.load_config_btn.setMinimumSize(100, 35)
+        self.load_config_btn.clicked.connect(self.load_model_config)
+        
+        config_button_layout.addWidget(self.save_config_btn)
+        config_button_layout.addWidget(self.load_config_btn)
+        config_button_layout.addStretch()
+        model_layout.addLayout(config_button_layout)
+        
+        model_group.setLayout(model_layout)
+        ai_layout.addWidget(model_group)
         
         # 路径选择区域 (AI Translation tab)
         path_group = QGroupBox("📂 模组文件夹路径")
@@ -683,8 +763,28 @@ class ModProcessorGUI(QMainWindow):
         self.log_message("🚀 开始处理模组文件...")
         self.statusBar().showMessage("处理中...")
         
+        # 获取模型配置
+        model_name = self.model_name_input.text().strip()
+        api_key = self.api_key_input.text().strip()
+        base_url = self.base_url_input.text().strip()
+        
+        if not model_name:
+            QMessageBox.warning(self, "警告", "请填写模型名称！")
+            self.on_processing_finished()
+            return
+            
+        if not api_key:
+            QMessageBox.warning(self, "警告", "请填写API密钥！")
+            self.on_processing_finished()
+            return
+        
         # 创建并启动工作线程
-        self.worker = ModProcessorWorker(directory_path)
+        self.worker = ModProcessorWorker(
+            directory_path=directory_path,
+            model_name=model_name,
+            api_key=api_key,
+            base_url=base_url
+        )
         self.worker.signals.log.connect(self.log_message)
         self.worker.signals.progress.connect(self.update_progress)
         self.worker.signals.finished.connect(self.on_processing_finished)
@@ -822,6 +922,53 @@ class ModProcessorGUI(QMainWindow):
         self.rs_progress_bar.setValue(current)
         self.statusBar().showMessage(f"重命名/交换操作中... ({current}/{total})")
 
+
+    @Slot()
+    def save_model_config(self):
+        """保存模型配置到文件"""
+        config = {
+            "model_name": self.model_name_input.text().strip(),
+            "api_key": self.api_key_input.text().strip(),
+            "base_url": self.base_url_input.text().strip()
+        }
+        
+        file_path, _ = QFileDialog.getSaveFileName(
+            self,
+            "保存模型配置",
+            "model_config.json",
+            "JSON Files (*.json)"
+        )
+        
+        if file_path:
+            try:
+                with open(file_path, 'w', encoding='utf-8') as f:
+                    json.dump(config, f, ensure_ascii=False, indent=2)
+                self.log_message(f"✅ 模型配置已保存到: {file_path}")
+            except Exception as e:
+                QMessageBox.critical(self, "错误", f"保存配置失败: {str(e)}")
+    
+    @Slot()
+    def load_model_config(self):
+        """从文件加载模型配置"""
+        file_path, _ = QFileDialog.getOpenFileName(
+            self,
+            "加载模型配置",
+            "",
+            "JSON Files (*.json)"
+        )
+        
+        if file_path:
+            try:
+                with open(file_path, 'r', encoding='utf-8') as f:
+                    config = json.load(f)
+                
+                self.model_name_input.setText(config.get("model_name", ""))
+                self.api_key_input.setText(config.get("api_key", ""))
+                self.base_url_input.setText(config.get("base_url", ""))
+                
+                self.log_message(f"✅ 模型配置已从文件加载: {file_path}")
+            except Exception as e:
+                QMessageBox.critical(self, "错误", f"加载配置失败: {str(e)}")
 
 def main():
     """主函数"""

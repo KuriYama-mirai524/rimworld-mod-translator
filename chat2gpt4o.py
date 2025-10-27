@@ -90,7 +90,7 @@ def glm(message, pormet):
                 timeout=10
             )
             completion = client.chat.completions.create(
-                model="glm-4-flash",  
+                model="glm-4-Air",  
                 messages=[    
                     {"role": "system", "content": pormet},    
                     {"role": "user", "content": message} 
@@ -133,6 +133,34 @@ def qwen_flash(message, pormet):
                 return None
             time.sleep(retry_delay)
             retry_delay *= 2
+
+def call_model(model_name: str, message: str, pormet: str, api_key: str = "", base_url: str = ""):
+    """
+    通用模型调用函数
+    Args:
+        model_name: 模型名称 (glm, deepseek, qwen, gpt)
+        message: 用户消息
+        pormet: 系统提示词
+        api_key: API密钥
+        base_url: API基础URL
+    """
+    # 设置环境变量以便现有函数使用
+    if api_key:
+        env_key = f"{model_name.upper()}_API_KEY"
+        os.environ[env_key] = api_key
+    
+    # 根据模型名称调用相应的函数
+    if model_name.lower() == "glm":
+        return glm(message, pormet)
+    elif model_name.lower() == "deepseek":
+        return deepseek(message, pormet)
+    elif model_name.lower() == "qwen":
+        return qwen_flash(message, pormet)
+    elif model_name.lower() == "gpt":
+        return send_chat(message, pormet)
+    else:
+        # 默认使用GLM
+        return glm(message, pormet)
 
 if __name__ == "__main__":
     print(qwen_flash("你好","你好"))
